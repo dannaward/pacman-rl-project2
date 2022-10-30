@@ -76,7 +76,6 @@ class ReflexAgent(Agent):
         "*** YOUR CODE HERE ***"
 
         foodList = newFood.asList()
-        foodDistanceList = []
 
         closestFood = -1.0
         for food in foodList:
@@ -86,9 +85,6 @@ class ReflexAgent(Agent):
             if manhattanDistance(newPos, ghostPos) < 2:
                 return -100
         closestGhost = manhattanDistance(newPos, newGhostStates[0].configuration.pos)
-
-        # if action == Directions.STOP:
-        #     return childGameState.getScore() + closestGhost / (closestFood * 10) - 50
 
         return childGameState.getScore() + closestGhost / (closestFood * 10)
         # return childGameState.getScore() + 1.0/closestFood
