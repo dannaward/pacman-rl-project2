@@ -154,11 +154,13 @@ class MinimaxAgent(MultiAgentSearchAgent):
                          key=lambda action: self.minValue(gameState.getNextState(0, action), 1, 1))
 
     def minimax(self, gameState, agentIndex, depth):
-        if gameState.isLose() or gameState.isWin():
-            return self.evaluationFunction(gameState)
+        terminal = gameState.isLose() or gameState.isWin() or depth == self.depth * gameState.getNumAgents()
+        utility = self.evaluationFunction(gameState)
 
-        if depth == self.depth * gameState.getNumAgents():
-            return self.evaluationFunction(gameState)
+        if terminal:
+            return utility
+
+        print(utility)
 
         if agentIndex is 0:
             return self.maxValue(gameState, agentIndex, depth)[1]
