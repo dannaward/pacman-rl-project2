@@ -14,7 +14,7 @@
 
 from util import manhattanDistance
 from game import Directions
-import random, util
+import random, util, math
 
 from game import Agent
 
@@ -89,6 +89,7 @@ class ReflexAgent(Agent):
         return childGameState.getScore() + closestGhost / (closestFood * 10)
         # return childGameState.getScore() + 1.0/closestFood
 
+
 def scoreEvaluationFunction(currentGameState):
     """
     This default evaluation function just returns the score of the state.
@@ -151,40 +152,36 @@ class MinimaxAgent(MultiAgentSearchAgent):
         """
         "*** YOUR CODE HERE ***"
         return max(gameState.getLegalActions(0),
-                         key=lambda action: self.minValue(gameState.getNextState(0, action), 1, 1))
+                   key=lambda action: self.minValue(gameState.getNextState(0, action), 1, 1))
 
-    def minimax(self, gameState, agentIndex, depth):
-        terminal = gameState.isLose() or gameState.isWin() or depth == self.depth * gameState.getNumAgents()
-        utility = self.evaluationFunction(gameState)
+    def maxValue(self, gameState, agentIndex, depth):
+        legalActions = gameState.getLegalActions(agentIndex)
+        isTerminal = not legalActions or depth == self.depth
 
-        if terminal:
-            return utility
+        if isTerminal:
+            return self.evaluationFunction(gameState)  # utility
 
-        print(utility)
+        v = -math.inf
+        for action in legalActions:
+            v = max(v, self.minValue(gameState.getNextState(0, action), 0 + 1, depth + 1))
 
-        if agentIndex is 0:
-            return self.maxValue(gameState, agentIndex, depth)[1]
-        else:
-            return self.minValue(gameState, agentIndex, depth)[1]
+        return v
 
     def minValue(self, gameState, agentIndex, depth):
         legalActions = gameState.getLegalActions(agentIndex)
-        if not legalActions:  # NO legalActions means game finished(win or lose)
-            return self.evaluationFunction(gameState)
+        isTerminal = not legalActions
 
-        # When all ghosts moved, it's pacman's turn
-        if agentIndex == gameState.getNumAgents() - 1:
-            return min(self.maxValue(gameState.getNextState(agentIndex, action), depth) for action in legalActions)
-        else:
-            return min(self.minValue(gameState.getNextState(agentIndex, action), agentIndex + 1, depth) for action in
-                       legalActions)
+        if isTerminal:
+            return self.evaluationFunction(gameState)  # utility
 
-    def maxValue(self, gameState, depth):
-        legalActions = gameState.getLegalActions(0)
-        if not legalActions or depth == self.depth:
-            return self.evaluationFunction(gameState)
+        v = math.inf
+        for action in legalActions:
+            if agentIndex == gameState.getNumAgents() - 1:
+                v = min(v, self.maxValue(gameState.getNextState(agentIndex, action), 0, depth))
+            else:
+                v = min(v, self.minValue(gameState.getNextState(agentIndex, action), agentIndex + 1, depth))
+        return v
 
-        return max(self.minValue(gameState.getNextState(0, action), 0 + 1, depth + 1) for action in legalActions)
 
 class AlphaBetaAgent(MultiAgentSearchAgent):
     """
