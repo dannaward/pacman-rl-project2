@@ -193,7 +193,58 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
         Returns the minimax action using self.depth and self.evaluationFunction
         """
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        return self.maxValue(gameState, 0, 0, -math.inf, math.inf)
+
+    def maxValue(self, gameState, agentIndex, depth, alpha, beta):
+        legalActions = gameState.getLegalActions(agentIndex)
+        isTerminal = not legalActions or depth == self.depth
+        bestAction = 0
+
+        if isTerminal:
+            return self.evaluationFunction(gameState)  # utility
+
+        v = -math.inf
+
+        for action in legalActions:
+            nextV = self.minValue(gameState.getNextState(0, action), 1, depth + 1, alpha, beta)
+
+            if nextV > v and depth == 0:
+                bestAction = action
+
+            v = max(v, nextV)
+
+            if v > beta:
+                return v
+            else:
+                alpha = max(alpha, v)
+
+        if depth == 0:
+            return bestAction
+
+        return v
+
+    def minValue(self, gameState, agentIndex, depth, alpha, beta):
+        legalActions = gameState.getLegalActions(agentIndex)
+        isTerminal = not legalActions
+
+        if isTerminal:
+            return self.evaluationFunction(gameState)  # utility
+
+        v = math.inf
+        for action in legalActions:
+            if agentIndex == gameState.getNumAgents() - 1:
+                nextV = self.maxValue(gameState.getNextState(agentIndex, action), 0, depth, alpha, beta)
+            else:
+                nextV = self.minValue(gameState.getNextState(agentIndex, action), agentIndex + 1, depth, alpha, beta)
+
+            v = min(v, nextV)
+
+            if v < alpha:
+                return v
+            else:
+                beta = min(beta, v)
+
+        return v
 
 
 class ExpectimaxAgent(MultiAgentSearchAgent):
